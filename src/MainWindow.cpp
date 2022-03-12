@@ -36,7 +36,7 @@ static void glfwErrorCallback(int error, const char *description)
     std::cerr << "GLFW Error " << error << ": " << description << std::endl;
 }
 
-MainWindow::MainWindow()
+MainWindow::MainWindow() : lastMousePosition(0.0f)
 {
     glfwSetErrorCallback(glfwErrorCallback);
     if (!glfwInit())
@@ -119,7 +119,7 @@ int MainWindow::runEventLoop()
                 move.z -= 1.0f;
             }
             if (glm::length(move) > 0.01f)
-                renderContext.moveCameraKeyboard(move * 0.005f);
+                renderContext.moveCameraKeyboard(move * config->moveSpeed * 0.001f);
         }
 
         glfwPollEvents();
@@ -175,7 +175,7 @@ void MainWindow::cursorPositionCallback(double xpos, double ypos)
     {
         glm::vec2 mousePosition { static_cast<float>(xpos), static_cast<float>(ypos) };
         glm::vec2 difference = mousePosition - lastMousePosition ;
-        renderContext.rotateCamera(glm::vec3(difference.y, difference.x, 0.0f) * 0.0015f);
+        renderContext.rotateCamera(glm::vec3(difference.y, difference.x, 0.0f) * 0.001f * config->sensitivity);
 
         lastMousePosition = mousePosition;
     }

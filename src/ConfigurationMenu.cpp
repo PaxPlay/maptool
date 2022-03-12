@@ -39,9 +39,12 @@ void ConfigurationMenu::draw()
     ImGui::NewFrame();
 
     ImGui::Begin("Debug");
-    focused = ImGui::IsWindowHovered();
 
-    ImGui::Checkbox("Test Checkbox", &testCheckbox);
+    if (ImGui::CollapsingHeader("Input"))
+    {
+        ImGui::DragFloat("Sensitivity", &sensitivity, 0.01, 0.01f, 10.0f);
+        ImGui::DragFloat("Move Speed", &moveSpeed, 0.01, 0.01f, 50.0f);
+    }
 
     ImGui::End();
 

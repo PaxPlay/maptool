@@ -13,8 +13,9 @@ public:
     bool wantsMouseInput() const;
 private:
     bool initialized = false;
-    bool focused = false;
-    bool testCheckbox = false;
+public:
+    float sensitivity = 1.5f;
+    float moveSpeed = 5.0f;
 };
 
 extern ConfigurationMenu *config;
