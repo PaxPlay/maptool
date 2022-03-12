@@ -2,21 +2,57 @@
 
 #include <GL/glew.h>
 
-#include <SFML/Window.hpp>
-#include <SFML/OpenGL.hpp>
-
 #include <iostream>
 #include <chrono>
 #include <thread>
 
+#include "ConfigurationMenu.h"
+
+static MainWindow *windowInstance = nullptr;
+
+void sizeCallback(GLFWwindow *window, int width, int height)
+{
+    windowInstance->resized(width, height);
+}
+
+void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
+{
+    windowInstance->keyCallback(key, scancode, action, mode);
+}
+
+void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
+{
+    windowInstance->mouseButtonCallback(button, action, mods);
+}
+
+void cursorPositionCallback(GLFWwindow *window, double xpos, double ypos)
+{
+    windowInstance->cursorPositionCallback(xpos, ypos);
+}
+
 void APIENTRY debugCallback(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const  char *message, const void *userParam);
+static void glfwErrorCallback(int error, const char *description)
+{
+    std::cerr << "GLFW Error " << error << ": " << description << std::endl;
+}
 
 MainWindow::MainWindow()
 {
-    window.create(sf::VideoMode(800, 600),
-            "Main Window",
-            sf::Style::Default,
-            sf::ContextSettings(32, 8, 0, 4, 0, sf::ContextSettings::Attribute::Debug));
+    glfwSetErrorCallback(glfwErrorCallback);
+    if (!glfwInit())
+    {
+        std::cerr << "Failed to initialize GLFW!" << std::endl;
+        return;
+    }
+    if (!glfwRawMouseMotionSupported())
+    {
+        std::cerr << "Raw mouse input is not supported." << std::endl;
+    }
+
+    window = glfwCreateWindow(800, 600, "maptool", nullptr, nullptr);
+    windowInstance = this;
+    glfwMakeContextCurrent(window);
+    // settings: sf::ContextSettings(32, 8, 0, 4, 0, sf::ContextSettings::Attribute::Debug));
 
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -31,99 +67,117 @@ MainWindow::MainWindow()
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClearDepth(1.0f);
-    resized();
+    glfwSetKeyCallback(window, ::keyCallback);
+    glfwSetWindowSizeCallback(window, ::sizeCallback);
+    glfwSetMouseButtonCallback(window, ::mouseButtonCallback);
+    glfwSetCursorPosCallback(window, ::cursorPositionCallback);
+    glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    resized(width, height);
+    config->init(window);
 }
 
 int MainWindow::runEventLoop()
 {
     auto lastFrame = std::chrono::high_resolution_clock::now();
-    while (window.isOpen()) {
+    while (!glfwWindowShouldClose(window)) {
         renderContext.render();
-        window.display();
+        config->draw();
+        glfwSwapBuffers(window);
         std::chrono::duration<double> frameTime = std::chrono::high_resolution_clock::now() - lastFrame;
         if (frameTime.count() < 0.01)
         {
             std::this_thread::sleep_for(std::chrono::duration<double>(0.01) - frameTime);
         }
 
-        glm::vec3 move {0.0f};
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        if (isFocused())
         {
-            move.x += 1.0f;
+            glm::vec3 move{ 0.0f };
+            if (isKeyPressed(GLFW_KEY_W))
+            {
+                move.x += 1.0f;
+            }
+            if (isKeyPressed(GLFW_KEY_S))
+            {
+                move.x -= 1.0f;
+            }
+            if (isKeyPressed(GLFW_KEY_A))
+            {
+                move.y += 1.0f;
+            }
+            if (isKeyPressed(GLFW_KEY_D))
+            {
+                move.y -= 1.0f;
+            }
+            if (isKeyPressed(GLFW_KEY_SPACE))
+            {
+                move.z += 1.0f;
+            }
+            if (isKeyPressed(GLFW_KEY_LEFT_CONTROL))
+            {
+                move.z -= 1.0f;
+            }
+            if (glm::length(move) > 0.01f)
+                renderContext.moveCameraKeyboard(move * 0.005f);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-        {
-            move.x -= 1.0f;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-        {
-            move.y += 1.0f;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-        {
-            move.y -= 1.0f;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-        {
-            move.z += 1.0f;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
-        {
-            move.z -= 1.0f;
-        }
-        if (glm::length(move) > 0.01f)
-            renderContext.moveCameraKeyboard(move * 0.005f);
 
-        sf::Event event {};
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
-            if (event.type == sf::Event::Resized)
-                resized(); // stuff happens
-            if (event.type == sf::Event::MouseMoved)
-                processMouseMoveEvent(event.mouseMove);
-            if (event.type == sf::Event::KeyPressed)
-                processKeyPressEvent(event.key);
-            if (event.type == sf::Event::MouseButtonPressed)
-                processMouseButtonClickedEvent(event.mouseButton);
-        }
+        glfwPollEvents();
     }
+
+    config->shutdown();
     return 0;
 }
 
-void MainWindow::resized()
+void MainWindow::resized(int width, int height)
 {
-    glViewport(0, 0, (int)window.getSize().x, (int)window.getSize().y);
-    renderContext.setAspectRatio(getAspectRatio());
+    glViewport(0, 0, width, height);
+    renderContext.setAspectRatio(static_cast<float>(width) / static_cast<float>(height));
 }
 
-void MainWindow::processMouseMoveEvent(const sf::Event::MouseMoveEvent &event)
+bool MainWindow::isKeyPressed(int key)
 {
-    if (window.hasFocus() && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    int state = glfwGetKey(window, key);
+    return state >= GLFW_PRESS;
+}
+
+void MainWindow::keyCallback(int key, int scancode, int action, int mode)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
-        auto screenCenter = getSize() / 2.0f;
-        int centerX = static_cast<int>(screenCenter.x);
-        int centerY = static_cast<int>(screenCenter.y);
-        auto dx = static_cast<float>(event.x - centerX);
-        auto dy = static_cast<float>(event.y - centerY);
-        sf::Mouse::setPosition({ centerX, centerY }, window);
-        renderContext.rotateCamera( {dy * 0.0025, dx * 0.0025, 0.0f} );
+        if (isControllingCamera)
+        {
+            isControllingCamera = false;
+            glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_FALSE);
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
     }
 }
 
-void MainWindow::processKeyPressEvent(const sf::Event::KeyEvent &event)
+void MainWindow::mouseButtonCallback(int button, int action, int mods)
 {
-
+    if (button == GLFW_MOUSE_BUTTON_1)
+    {
+        if (action == GLFW_PRESS && isFocused() && !config->wantsMouseInput())
+        {
+            isControllingCamera = true;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            lastMousePosition = { static_cast<float>(xpos), static_cast<float>(ypos) };
+        }
+    }
 }
 
-void MainWindow::processMouseButtonClickedEvent(const sf::Event::MouseButtonEvent &event)
+void MainWindow::cursorPositionCallback(double xpos, double ypos)
 {
-    if (window.hasFocus())
+    if (isControllingCamera)
     {
-        auto screenCenter = getSize() / 2.0f;
-        int centerX = static_cast<int>(screenCenter.x);
-        int centerY = static_cast<int>(screenCenter.y);
-        sf::Mouse::setPosition({ centerX, centerY }, window);
+        glm::vec2 mousePosition { static_cast<float>(xpos), static_cast<float>(ypos) };
+        glm::vec2 difference = mousePosition - lastMousePosition ;
+        renderContext.rotateCamera(glm::vec3(difference.y, difference.x, 0.0f) * 0.0015f);
+
+        lastMousePosition = mousePosition;
     }
 }
 
