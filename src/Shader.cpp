@@ -98,16 +98,18 @@ void Shader::finalize()
 }
 
 template<>
-void Shader::uniform<glm::mat4>(const std::string &name, glm::mat4 &value)
+Shader& Shader::uniform<glm::mat4>(const std::string &name, glm::mat4 &value)
 {
     auto loc = getUniform(name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, (const float*)&value);
+    return *this;
 }
 
 int Shader::getUniform(const std::string &name)
 {
     auto it = uniforms.find(name);
-    if (it == uniforms.end()) {
+    if (it == uniforms.end())
+    {
         std::cerr << "The specified uniform \"" << name << "\" does not exist." << std::endl;
         return -1;
     }
@@ -115,8 +117,8 @@ int Shader::getUniform(const std::string &name)
     return it->second.loc;
 }
 
-void Shader::bind()
+Shader& Shader::bind()
 {
     glUseProgram(handle);
+    return *this;
 }
-

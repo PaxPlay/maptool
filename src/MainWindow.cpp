@@ -38,15 +38,18 @@ static void glfwErrorCallback(int error, const char *description)
 
 MainWindow::MainWindow() : lastMousePosition(0.0f)
 {
+    if (windowInstance)
+        throw std::logic_error("There can only be one MainWindow instance during runtime.");
     glfwSetErrorCallback(glfwErrorCallback);
     if (!glfwInit())
     {
         std::cerr << "Failed to initialize GLFW!" << std::endl;
-        return;
+        throw std::logic_error("Failed to initialize GLFW");
     }
     if (!glfwRawMouseMotionSupported())
     {
         std::cerr << "Raw mouse input is not supported." << std::endl;
+        throw std::logic_error("Raw mouse input is not supported.");
     }
 
     window = glfwCreateWindow(800, 600, "maptool", nullptr, nullptr);
@@ -58,6 +61,7 @@ MainWindow::MainWindow() : lastMousePosition(0.0f)
     if (GLEW_OK != err)
     {
         std::cerr << "Failed to init GLEW: " << glewGetErrorString(err) << std::endl;
+        throw std::logic_error("Failed to initialize GLEW");
     }
 
     glEnable(GL_DEBUG_OUTPUT);
@@ -85,6 +89,8 @@ int MainWindow::runEventLoop()
         renderContext.render();
         config->draw();
         glfwSwapBuffers(window);
+
+        // limit frame rate
         std::chrono::duration<double> frameTime = std::chrono::high_resolution_clock::now() - lastFrame;
         if (frameTime.count() < 0.01)
         {
@@ -119,7 +125,7 @@ int MainWindow::runEventLoop()
                 move.z -= 1.0f;
             }
             if (glm::length(move) > 0.01f)
-                renderContext.moveCameraKeyboard(move * config->moveSpeed * 0.001f);
+                renderContext.moveCameraKeyboard(glm::normalize(move) * config->moveSpeed * 0.001f);
         }
 
         glfwPollEvents();

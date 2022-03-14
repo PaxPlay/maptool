@@ -1,9 +1,13 @@
 #ifndef MAPTOOL_SRC_TESTRENDERSCENE_H
 #define MAPTOOL_SRC_TESTRENDERSCENE_H
 
+#include <memory>
+
 #include "RenderScene.h"
 #include "Camera.h"
 #include "Shader.h"
+#include "ShaderManager.h"
+#include "VertexArray.h"
 
 class TestRenderScene : public RenderScene {
 public:
@@ -15,13 +19,8 @@ public:
 
 private:
     Camera camera;
-    Shader basic;
-    Shader cube;
-
-    unsigned int vertexBufferObject = 0;
-    unsigned int vertexArrayObject = 0;
-    unsigned int colorArrayObject = 0;
-    unsigned int indexBufferObject = 0;
+    ShaderManager shaders;
+    std::unique_ptr<VertexArray> cube = nullptr;
 };
 
 

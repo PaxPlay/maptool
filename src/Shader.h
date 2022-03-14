@@ -7,6 +7,7 @@
 class Shader {
 public:
     Shader() = default;
+    Shader(const Shader &obj) = delete;
 
     enum class ShaderType {
         VERTEX,
@@ -18,8 +19,8 @@ public:
     void finalize();
 
     template<typename T>
-    void uniform(const std::string &name, T &value);
-    void bind();
+    Shader& uniform(const std::string &name, T &value);
+    Shader& bind();
 private:
     int getUniform(const std::string &name);
 
