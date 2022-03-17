@@ -98,10 +98,26 @@ void Shader::finalize()
 }
 
 template<>
-Shader& Shader::uniform<glm::mat4>(const std::string &name, glm::mat4 &value)
+Shader& Shader::uniform<glm::vec3>(const std::string &name, const glm::vec3 &value)
+{
+    auto loc = getUniform(name);
+    glUniform3fv(loc, 1, (const float*)&value);
+    return *this;
+}
+
+template<>
+Shader& Shader::uniform<glm::mat4>(const std::string &name, const glm::mat4 &value)
 {
     auto loc = getUniform(name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, (const float*)&value);
+    return *this;
+}
+
+template<>
+Shader& Shader::uniform<glm::mat3>(const std::string &name, const glm::mat3 &value)
+{
+    auto loc = getUniform(name);
+    glUniformMatrix3fv(loc, 1, GL_FALSE, (const float*)&value);
     return *this;
 }
 

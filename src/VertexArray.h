@@ -9,18 +9,24 @@
 
 class VertexArray {
 public:
-    VertexArray(std::vector<glm::vec3> vertices, std::vector<unsigned int> indices);
+    enum class Type {
+        TRIANGLES,
+        TRIANGLE_STRIP
+    };
+
+    VertexArray(std::vector<glm::vec3> *vertices, std::vector<unsigned int> *indices, Type type = Type::TRIANGLE_STRIP);
 
     template<typename T>
-    void addBuffer(const std::string& name, std::vector<T> elements, unsigned int layoutIndex);
+    void addBuffer(const std::string& name, std::vector<T> *elements, unsigned int layoutIndex);
 
     void draw();
 private:
-    void initialize(std::vector<glm::vec3> vertices);
+    void initialize(std::vector<glm::vec3> *vertices);
 
+    Type type;
     unsigned int vertexArray = 0;
     unsigned int indexBuffer = 0;
-    std::vector<unsigned int> indices;
+    std::vector<unsigned int> *indices;
 
     class BufferObject {
     public:
@@ -38,18 +44,18 @@ private:
     template<typename T>
     struct GenericBufferObject : BufferObject {
     private:
-        std::vector<T> elements;
+        std::vector<T> *elements;
         size_t size;
         unsigned int baseType;
     public:
-        GenericBufferObject(std::vector<T> elements, size_t size, unsigned int baseType)
-            : elements(std::move(elements)), size(size), baseType(baseType)
+        GenericBufferObject(std::vector<T> *elements, size_t size, unsigned int baseType)
+            : elements(elements), size(size), baseType(baseType)
         {
         }
         ~GenericBufferObject() override = default;
-        void* getData() override { return elements.data(); }
-        size_t totalSize() override { return elements.size() * sizeof(T); };
-        size_t numElements() override { return elements.size(); }
+        void* getData() override { return elements->data(); }
+        size_t totalSize() override { return elements->size() * sizeof(T); };
+        size_t numElements() override { return elements->size(); }
         size_t blockSize() override { return sizeof(T); }
         size_t getSize() override { return size; };
         unsigned int typeId() override { return baseType; }

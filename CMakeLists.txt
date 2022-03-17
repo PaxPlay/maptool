@@ -22,16 +22,17 @@ add_executable(maptool
         src/OWModel.h
         src/ConfigurationMenu.cpp
         src/ConfigurationMenu.h
-        src/RGBCube.cpp
-        src/RGBCube.h
         src/ShaderManager.cpp
         src/ShaderManager.h
+        src/VertexArray.cpp
+        src/VertexArray.h
+        src/IModel.h
         src/imgui/imgui.cpp
         src/imgui/imgui_draw.cpp
         src/imgui/imgui_tables.cpp
         src/imgui/imgui_widgets.cpp
         src/imgui/imgui_impl_opengl3.cpp
-        src/imgui/imgui_impl_glfw.cpp src/VertexArray.cpp src/VertexArray.h)
+        src/imgui/imgui_impl_glfw.cpp)
 target_include_directories(maptool PUBLIC
         ${PROJECT_SOURCE_DIR}/deps/glfw-3.3.6.bin.WIN64/include/
         ${PROJECT_SOURCE_DIR}/deps/glm/

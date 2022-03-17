@@ -7,6 +7,7 @@
 #include <thread>
 
 #include "ConfigurationMenu.h"
+#include "OWModel.h"
 
 static MainWindow *windowInstance = nullptr;
 

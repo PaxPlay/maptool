@@ -19,7 +19,7 @@ public:
     void finalize();
 
     template<typename T>
-    Shader& uniform(const std::string &name, T &value);
+    Shader& uniform(const std::string &name, const T &value);
     Shader& bind();
 private:
     int getUniform(const std::string &name);

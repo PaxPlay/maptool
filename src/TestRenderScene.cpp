@@ -1,8 +1,6 @@
 #include "TestRenderScene.h"
 
 #include <GL/glew.h>
-#include <iostream>
-#include <string>
 
 #include "ShaderManager.h"
 #include "VertexArray.h"
@@ -15,7 +13,7 @@ static std::vector<glm::vec3> vertices = {
         glm::vec3(0.0f, 1.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 1.0f),
         glm::vec3(1.0f, 1.0f, 1.0f),
-        glm::vec3(1.0f, 1.0f, 0.0)
+        glm::vec3(1.0f, 1.0f, 0.0f)
 };
 
 /*
@@ -36,7 +34,8 @@ void TestRenderScene::init()
     camera.setNear(0.01f);
 
     shaders.loadShader("cube", "../shader/cube.vert", "", "../shader/cube.frag");
-    cube = std::make_unique<VertexArray>(vertices, indices);
+    shaders.loadShader("owmodel", "../shader/owmodel.vert", "", "../shader/owmodel.frag");
+    cube = std::make_unique<VertexArray>(&vertices, &indices);
 }
 
 void TestRenderScene::draw()
@@ -44,11 +43,13 @@ void TestRenderScene::draw()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    auto MVP = camera.getVP();
-    shaders["cube"].bind()
-        .uniform("MVP", MVP);
+    glm::mat4 VP = camera.getVP();
+    glm::mat4 M = glm::mat4(1.0f);
 
-    cube->draw();
+    model.draw(VP, M, &shaders, camera);
+//    shaders["cube"].bind()
+//            .uniform("MVP", VP);
+//    cube->draw();
 }
 
 Camera* TestRenderScene::getCamera()

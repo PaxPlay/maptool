@@ -8,6 +8,7 @@
 #include "Shader.h"
 #include "ShaderManager.h"
 #include "VertexArray.h"
+#include "OWModel.h"
 
 class TestRenderScene : public RenderScene {
 public:
@@ -20,6 +21,8 @@ public:
 private:
     Camera camera;
     ShaderManager shaders;
+    OWModel model { "../assets/Rialto/79F/Models/00000000598C.00C/00000000598C.owmdl" };
+
     std::unique_ptr<VertexArray> cube = nullptr;
 };
 
