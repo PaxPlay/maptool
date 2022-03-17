@@ -45,7 +45,7 @@ glm::vec3 Camera::angleToDirection(glm::vec3 angle)
     float cosTheta = cosf(-angle.x);
     float sinPhi = sinf(angle.y);
     float cosPhi = cosf(angle.y);
-    return { cosPhi * cosTheta, sinTheta, sinPhi * cosTheta};
+    return { cosPhi * cosTheta, sinTheta, sinPhi * cosTheta };
 }
 
 void Camera::setPosition(const glm::vec3 &value)

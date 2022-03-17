@@ -4,6 +4,7 @@
 
 #include "ShaderManager.h"
 #include "VertexArray.h"
+#include "OWMap.h"
 
 static std::vector<glm::vec3> vertices = {
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -36,6 +37,7 @@ void TestRenderScene::init()
     shaders.loadShader("cube", "../shader/cube.vert", "", "../shader/cube.frag");
     shaders.loadShader("owmodel", "../shader/owmodel.vert", "", "../shader/owmodel.frag");
     cube = std::make_unique<VertexArray>(&vertices, &indices);
+    OWMap map { "../assets/Rialto/79F/", "Rialto.owmap" };
 }
 
 void TestRenderScene::draw()

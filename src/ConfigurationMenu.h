@@ -15,7 +15,7 @@ private:
     bool initialized = false;
 public:
     float sensitivity = 1.5f;
-    float moveSpeed = 5.0f;
+    float moveSpeed = 100.0f;
 };
 
 extern ConfigurationMenu *config;

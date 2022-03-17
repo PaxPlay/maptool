@@ -27,6 +27,10 @@ add_executable(maptool
         src/VertexArray.cpp
         src/VertexArray.h
         src/IModel.h
+        src/OWMap.cpp
+        src/OWMap.h
+        src/OWAsset.cpp
+        src/OWAsset.h
         src/imgui/imgui.cpp
         src/imgui/imgui_draw.cpp
         src/imgui/imgui_tables.cpp

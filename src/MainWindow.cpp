@@ -126,7 +126,7 @@ int MainWindow::runEventLoop()
                 move.z -= 1.0f;
             }
             if (glm::length(move) > 0.01f)
-                renderContext.moveCameraKeyboard(glm::normalize(move) * config->moveSpeed * 0.001f);
+                renderContext.moveCameraKeyboard(glm::normalize(move) * config->moveSpeed * 0.1f);
         }
 
         glfwPollEvents();

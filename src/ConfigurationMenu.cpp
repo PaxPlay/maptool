@@ -43,7 +43,7 @@ void ConfigurationMenu::draw()
     if (ImGui::CollapsingHeader("Input"))
     {
         ImGui::DragFloat("Sensitivity", &sensitivity, 0.01, 0.01f, 10.0f);
-        ImGui::DragFloat("Move Speed", &moveSpeed, 0.01, 0.01f, 50.0f);
+        ImGui::DragFloat("Move Speed", &moveSpeed, 0.1, 0.1f, 250.0f);
     }
 
     ImGui::End();

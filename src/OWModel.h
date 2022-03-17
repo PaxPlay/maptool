@@ -9,8 +9,9 @@
 #include "VertexArray.h"
 #include "IModel.h"
 #include "Camera.h"
+#include "OWAsset.h"
 
-class OWModel : public IModel {
+class OWModel : public IModel, public OWAsset {
 public:
     explicit OWModel(const std::string &file);
     void draw(const glm::mat4 &VP, const glm::mat4 &M, ShaderManager *shaderManager, const Camera &camera) override;
@@ -73,8 +74,6 @@ private:
     std::vector<Bone> bones;
     std::vector<Mesh> meshes;
     std::vector<Empty> empties;
-private:
-    static std::string readString(std::ifstream &ifstream);
 };
 
 #endif //MAPTOOL_SRC_OWMODEL_H

@@ -46,25 +46,11 @@ OWModel::OWModel(const std::string &file)
 
     fstream.close();
 
-    std::cout << "Major: " << version.major << "; Minor: " << version.minor << std::endl
+    std::cout << "======== Model Summary ========" << std::endl
+              << "Major: " << version.major << "; Minor: " << version.minor << std::endl
               << "Material: " << mtl << std::endl
               << "Name: " << name << std::endl
               << "Bones: " << boneCount << ", Meshes: " << meshCount << ", Empties: " << emptyCount << std::endl;
-}
-
-std::string OWModel::readString(std::ifstream &ifstream)
-{
-    uint8_t length = 0;
-    ifstream.read((char*)&length, 1);
-    if (length == 0)
-        return {};
-    char *value = new char[length + 1];
-    ifstream.read(value, length);
-    value[length] = 0;
-    std::string ret { value };
-    delete[] value;
-
-    return ret;
 }
 
 void OWModel::draw(const glm::mat4 &VP, const glm::mat4 &M, ShaderManager *shaderManager, const Camera &camera)
